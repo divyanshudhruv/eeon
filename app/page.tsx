@@ -1,27 +1,19 @@
 "use client";
-import Image from "next/image";
 import "./style.css";
 import Avvvatars from "avvvatars-react";
 import { useState, useRef, useEffect } from "react";
+import {incrementPageView} from "./../lib/actions"
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, ArrowUpIcon } from "lucide-react";
+import { ArrowUpIcon } from "lucide-react";
 import React from "react";
 import { createContext, useContext } from "react";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card"
-import { CalendarDays } from "lucide-react"
- 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+
+import { logVisitor } from "../lib/actions";
+import { logClick } from "../lib/actions";
+
 interface GeminiRequestBody {
   contents: Array<{
     role: string;
@@ -147,10 +139,12 @@ function ChatInputTextArea({
     }
     if (e.key === "Enter" && !e.shiftKey) {
       if (typeof value !== "string" || value.trim().length === 0) {
+
         return;
       }
       e.preventDefault();
-      onSubmit();
+      onSubmit();          logClick(); // Track user click
+
     }
   };
 
@@ -236,6 +230,7 @@ function ChatInputSubmit({
         event.preventDefault();
         if (!isDisabled) {
           onSubmit?.();
+          logClick(); // Track user click
         }
       }}
       {...props}
@@ -306,7 +301,7 @@ const ChatInputDemo: React.FC<ChatInputDemoProps> = ({ onNewMessage }) => {
         };
 
         // Get bot response
-        let botAnswer = await gemeniRes(
+        const botAnswer = await gemeniRes(
           value,
           `Analyze the given promptabove according to  these points and generate the most relevant emojis for discussions, reactions, or context representation. Follow these strict guidelines:
 
@@ -350,7 +345,8 @@ DO NOT ANSWER QUESTION LIKE HI, WHO ARE YOU, WHAT YOU DO, OR SMALL QUESTIONS  OR
       }, 1000);
     }, 500);
   };
-
+  
+ 
   return (
     <div className="w-full max-w-[425px] h-fit">
       <ChatInput
@@ -375,6 +371,13 @@ interface Message {
 }
 
 export default function Home() {
+  useEffect(() => {
+    logVisitor();
+  }, []);
+  useEffect(() => {
+    incrementPageView();
+  }, []);
+
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -460,9 +463,9 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div className="backHome" onClick={window.location.reload}>
+      {/* <div className="backHome" onClick={window.location.reload}>
         <ArrowLeft color="#ffffff" size={18}/>
-      </div>
+      </div> */}
     </>
   );
 }
