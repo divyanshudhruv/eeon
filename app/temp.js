@@ -1,11 +1,8 @@
 "use client";
-import Image from "next/image";
 import "./style.css";
 import Avvvatars from "avvvatars-react";
 
 import { useState, createContext, useContext } from "react";
-import { toast } from "sonner";
-import { useTextArea } from "@/context/TextAreaContext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -32,11 +29,9 @@ async function gemeniRes(message, basePrompt) {
     const data = await res.json();
     return data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
   } catch (error) {
-    return "Error occurred.";
+    return "Error occurred."+ error;
   }
 }
-
-let promptValue = ""; // Global variable to store the prompt value
 
 const ChatInputContext = createContext({});
 
