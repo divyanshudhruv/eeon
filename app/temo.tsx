@@ -6,6 +6,12 @@ import Avvvatars from "avvvatars-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useTextArea } from "@/context/TextAreaContext";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { ArrowUpIcon } from "lucide-react";
+import type React from "react";
+import { createContext, useContext } from "react";
 
 interface GeminiResponse {
   candidates?: {
@@ -25,6 +31,7 @@ interface GeminiRequestBody {
     }[];
   }[];
 }
+
 async function gemeniRes(message: string, basePrompt: string): Promise<string> {
   try {
     const apiKey: string | undefined = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
@@ -50,13 +57,8 @@ async function gemeniRes(message: string, basePrompt: string): Promise<string> {
   }
 }
 
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
-import { ArrowUpIcon } from "lucide-react";
-import type React from "react";
-import { createContext, useContext } from "react";
-
+let promptValue = ""; // Global variable to store the prompt value
+//==========================================================================
 interface ChatInputContextValue {
   value?: string;
   onChange?: React.ChangeEventHandler<HTMLTextAreaElement>;
@@ -94,11 +96,11 @@ function ChatInput({
   };
 
   return (
-    <ChatInputContext.Provider value={contextValue}>{/*BG WHITE - BG  TRANSPARENT */}
+    <ChatInputContext.Provider value={contextValue}>
       <div
         className={cn(
           variant === "default" &&
-            "flex flex-col items-end w-full p-2 rounded-2xl border border-input bg-white focus-within:ring-1 focus-within:ring-ring focus-within:outline-none",
+            "flex flex-col items-end w-full p-2 rounded-2xl border border-input bg-transparent focus-within:ring-1 focus-within:ring-ring focus-within:outline-none",
           variant === "unstyled" && "flex items-start gap-2 w-full",
           className
         )}
@@ -239,67 +241,78 @@ function ChatInputSubmit({
 }
 
 ChatInputSubmit.displayName = "ChatInputSubmit";
+//==================================================================================================
 
+//==================================================================================================
+function ChatInputDemo({
+  setMessages,
+}: {
+  setMessages: React.Dispatch<
+    React.SetStateAction<{ type: "user" | "bot"; text: string }[]>
+  >;
+}) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [inputValue, setInputValue] = useState("");
 
-interface Message {
-  id: number;
-  type: "user" | "bot";
-  content: string;
-}
+  const handleSubmit = async () => {
+    if (!inputValue.trim()) return;
 
-interface ChatInputDemoProps {
-  onNewMessage: (message: Message) => void;
-}
-
-const ChatInputDemo: React.FC<ChatInputDemoProps> = ({ onNewMessage }) => {
-  const [value, setValue] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const handleSubmit = () => {
-    
-
-    const eeonDiv = document.getElementById("eeonDiv");
-    if (eeonDiv) {
-      eeonDiv.style.animation = "eeonOut 0.5s forwards";
-    }
-
-    setTimeout(() => {
-      const answerContainer = document.getElementById("answerContainer");
-    if (answerContainer) {
-      answerContainer.style.display = "flex";
-    }
-    if (!value.trim()) return; // Prevent sending empty messages
     setIsLoading(true);
 
-    const userMessage: Message = {
-      id: Date.now(),
-      type: "user",
-      content: value,
-    };
+    // ✅ Step 1: Show user's profile picture with "Building request"
+    setMessages((prev) => [
+      ...prev,
+      { type: "user", text: "Building request..." },
+    ]);
 
-    onNewMessage(userMessage); // Add user message to UI
+    // ✅ Step 2: Get shorter version of user prompt
+    const userBasePrompt =
+      "STRICTLY: Make the prompt given shorter and do not use any emoji  return to the point prompt for up to 17 words or less but more than 12 words. If the user entered a specific site name, use the site name too.";
+    const userShortPrompt = await gemeniRes(inputValue, userBasePrompt);
 
-    setTimeout(() => {
-      const botMessage: Message = {
-        id: Date.now(),
-        type: "bot",
-        content: "Finding the best emojis for you.",
-      };
+    // ✅ Step 3: Update user's message
+    setMessages((prev) => {
+      const updated = [...prev];
+      updated[updated.length - 1] = { type: "user", text: userShortPrompt };
+      return updated;
+    });
 
-      onNewMessage(botMessage); // Add bot message after delay
+    // ✅ Step 4: Show bot's profile picture with "Loading answer..."
+    setMessages((prev) => [
+      ...prev,
+      { type: "bot", text: "Loading answer..." },
+    ]);
+
+    // ✅ Step 5: Get bot's response
+    setTimeout(async () => {
+      const botBaseAnswer =
+        "STRICTLY:Give a short heading starting with # and then a line br space." +
+        userShortPrompt;
+      const prompt2 =
+        "Try to find a best emoji for the prompt. Then give a short description about why you found the emoji good and why will it work (in maximum 30 words) and then again line space br.";
+      const promptAnswer = botBaseAnswer + prompt2 + inputValue;
+      const botResponse = await gemeniRes(
+        promptAnswer,
+        "Generate top 5 emoji based on this prompt."
+      );
+
+      // ✅ Step 6: Update bot's message
+      setMessages((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1] = { type: "bot", text: botResponse };
+        return updated;
+      });
+
       setIsLoading(false);
-      setValue(""); // Clear input field
-    }, 1000);
-    }, 1000);
-    
+    }, 500);
   };
 
   return (
-    <div className="w-full max-w-[425px] h-fit">
+    <div className="w-full max-w-[425px] h-full">
       <ChatInput
         variant="default"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
         onSubmit={handleSubmit}
         loading={isLoading}
         onStop={() => setIsLoading(false)}
@@ -309,85 +322,69 @@ const ChatInputDemo: React.FC<ChatInputDemoProps> = ({ onNewMessage }) => {
       </ChatInput>
     </div>
   );
-};
-
-
-
-interface Message {
-  id: number;
-  type: "user" | "bot";
-  content: string;
 }
 
-export default function Home() {
-  const [messages, setMessages] = useState<Message[]>([]);
+//==================================================================================================
 
-  const handleNewMessage = (message: Message) => {
-    setMessages((prev) => [...prev, message]);
-  };
+export default function Home() {
+  // ✅ Store user and bot messages together to keep relative order
+  const [messages, setMessages] = useState<
+    { type: "user" | "bot"; text: string }[]
+  >([]);
 
   return (
-    <>
-      <div className="container">
-        <div className="eeonSpace">
-          <div className="top">
-           
-           
-           
-            <div className="answerContainer" id="answerContainer">
-              {messages.map((msg) => (
-                msg.type === "user" ? (
-                  <div key={msg.id} className="user">
-                    <div className="pfp">
-                      <Avvvatars value="qrwtwdqwe21uw" style="shape" size={55} />
-                    </div>
-                    <div className="prompt">{msg.content}</div>
+    <div className="container">
+      <div className="eeonSpace">
+        <div className="top">
+          <div className="answerContainer" id="answerContainer">
+            {messages.map((msg, index) => (
+              <div className={msg.type === "user" ? "user" : "bot"} key={index}>
+                <div className="user">
+                  <div className="pfp">
+                    <Avvvatars
+                      value={
+                        msg.type === "user" ? "qrwtwdqwe21uw" : "yehfe43g9aeon"
+                      }
+                      style="shape"
+                      size={55}
+                    />
                   </div>
-                ) : (
-                  <div key={msg.id} className="bot">
-                    <div className="index">
-                      <div className="pfp">
-                        <Avvvatars value="yehfe43g9aeon" style="shape" size={55} />
-                      </div>
-                      <div className="prompt">
-                        <span>{msg.content}</span>
-                      </div>
-                    </div>
-                    <div className="answer" id="botAnswer">Generated bot response</div>
-                  </div>
-                )
-              ))}
-            </div>
-
-
-              <div className="eeon"  id="eeonDiv">
-              <div className="eeonTop">
-                <div className="profilePic">
-                  <Avvvatars value="yehfe43g9aeon" style="shape" size={100} />
-                </div>
-                <div className="textTop">Talk data to me</div>
-                <div className="textBottom">
-                  Write your own prompt or select from the template and start chatting with eeon
+                  <div className="prompt">{msg.text}</div>
                 </div>
               </div>
-              <div className="eeonBottom">
-                <div className="textBottom">Ask about:</div>
-                <div className="tagsContainer">
-                  <div className="tag">Dev.to comments</div>
-                  <div className="tag">Ask</div>
-                  <div className="tag">Reaction for Reddit</div>
-                  <div className="tag">GitHub discussion</div>
-                  <div className="tag">Snippet videos</div>
-                </div>
-              </div>
-            </div>  
+            ))}
           </div>
-          
-          <div className="bottom">
-            <ChatInputDemo onNewMessage={handleNewMessage} />
+
+          {/* Info Section */}
+          <div className="eeon">
+            <div className="eeonTop">
+              <div className="profilePic">
+                <Avvvatars value="yehfe43g9aeon" style="shape" size={100} />
+              </div>
+              <div className="textTop">Talk data to me</div>
+              <div className="textBottom">
+                Write your own prompt or select from the template and start
+                chatting with eeon
+              </div>
+            </div>
+            <div className="eeonBottom">
+              <div className="textBottom">Ask about:</div>
+              <div className="tagsContainer">
+                <div className="tag">Dev.to comments</div>
+                <div className="tag">Ask</div>
+                <div className="tag">Reaction for reddit</div>
+                <div className="tag">Github discussion</div>
+                <div className="tag">Snippet videos</div>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Pass setMessages to ChatInputDemo */}
+        <div className="bottom">
+          <ChatInputDemo setMessages={setMessages} />
+        </div>
       </div>
-    </>
+    </div>
   );
 }
