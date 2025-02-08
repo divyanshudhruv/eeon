@@ -3,45 +3,24 @@ import Image from "next/image";
 import "./style.css";
 import Avvvatars from "avvvatars-react";
 
-import { useState } from "react";
+import { useState, createContext, useContext } from "react";
 import { toast } from "sonner";
 import { useTextArea } from "@/context/TextAreaContext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { ArrowUpIcon } from "lucide-react";
-import type React from "react";
-import { createContext, useContext } from "react";
 
-interface GeminiResponse {
-  candidates?: {
-    content?: {
-      parts?: {
-        text?: string;
-      }[];
-    };
-  }[];
-}
-
-interface GeminiRequestBody {
-  contents: {
-    role: string;
-    parts: {
-      text: string;
-    }[];
-  }[];
-}
-
-async function gemeniRes(message: string, basePrompt: string): Promise<string> {
+async function gemeniRes(message, basePrompt) {
   try {
-    const apiKey: string | undefined = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     if (!apiKey) throw new Error("Missing Gemini API Key");
 
-    const requestBody: GeminiRequestBody = {
+    const requestBody = {
       contents: [{ role: "user", parts: [{ text: basePrompt + message }] }],
     };
 
-    const res: Response = await fetch(
+    const res = await fetch(
       `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`,
       {
         method: "POST",
@@ -50,7 +29,7 @@ async function gemeniRes(message: string, basePrompt: string): Promise<string> {
       }
     );
 
-    const data: GeminiResponse = await res.json();
+    const data = await res.json();
     return data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
   } catch (error) {
     return "Error occurred.";
@@ -58,23 +37,8 @@ async function gemeniRes(message: string, basePrompt: string): Promise<string> {
 }
 
 let promptValue = ""; // Global variable to store the prompt value
-//==========================================================================
-interface ChatInputContextValue {
-  value?: string;
-  onChange?: React.ChangeEventHandler<HTMLTextAreaElement>;
-  onSubmit?: () => void;
-  loading?: boolean;
-  onStop?: () => void;
-  variant?: "default" | "unstyled";
-}
 
-const ChatInputContext = createContext<ChatInputContextValue>({});
-
-interface ChatInputProps extends Omit<ChatInputContextValue, "variant"> {
-  children: React.ReactNode;
-  className?: string;
-  variant?: "default" | "unstyled";
-}
+const ChatInputContext = createContext({});
 
 function ChatInput({
   children,
@@ -85,8 +49,8 @@ function ChatInput({
   onSubmit,
   loading,
   onStop,
-}: ChatInputProps) {
-  const contextValue: ChatInputContextValue = {
+}) {
+  const contextValue = {
     value,
     onChange,
     onSubmit,
@@ -113,13 +77,6 @@ function ChatInput({
 
 ChatInput.displayName = "ChatInput";
 
-interface ChatInputTextAreaProps extends React.ComponentProps<typeof Textarea> {
-  value?: string;
-  onChange?: React.ChangeEventHandler<HTMLTextAreaElement>;
-  onSubmit?: () => void;
-  variant?: "default" | "unstyled";
-}
-
 function ChatInputTextArea({
   onSubmit: onSubmitProp,
   value: valueProp,
@@ -127,17 +84,16 @@ function ChatInputTextArea({
   className,
   variant: variantProp,
   ...props
-}: ChatInputTextAreaProps) {
+}) {
   const context = useContext(ChatInputContext);
   const value = valueProp ?? context.value ?? "";
   const onChange = onChangeProp ?? context.onChange;
   const onSubmit = onSubmitProp ?? context.onSubmit;
 
-  // Convert parent variant to textarea variant unless explicitly overridden
   const variant =
     variantProp ?? (context.variant === "default" ? "unstyled" : "default");
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e) => {
     if (!onSubmit) {
       return;
     }
@@ -170,19 +126,13 @@ function ChatInputTextArea({
 
 ChatInputTextArea.displayName = "ChatInputTextArea";
 
-interface ChatInputSubmitProps extends React.ComponentProps<typeof Button> {
-  onSubmit?: () => void;
-  loading?: boolean;
-  onStop?: () => void;
-}
-
 function ChatInputSubmit({
   onSubmit: onSubmitProp,
   loading: loadingProp,
   onStop: onStopProp,
   className,
   ...props
-}: ChatInputSubmitProps) {
+}) {
   const context = useContext(ChatInputContext);
   const loading = loadingProp ?? context.loading;
   const onStop = onStopProp ?? context.onStop;
@@ -241,16 +191,8 @@ function ChatInputSubmit({
 }
 
 ChatInputSubmit.displayName = "ChatInputSubmit";
-//==================================================================================================
 
-//==================================================================================================
-function ChatInputDemo({
-  setMessages,
-}: {
-  setMessages: React.Dispatch<
-    React.SetStateAction<{ type: "user" | "bot"; text: string }[]>
-  >;
-}) {
+function ChatInputDemo({ setMessages }) {
   const [isLoading, setIsLoading] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
@@ -259,31 +201,26 @@ function ChatInputDemo({
 
     setIsLoading(true);
 
-    // ✅ Step 1: Show user's profile picture with "Building request"
     setMessages((prev) => [
       ...prev,
       { type: "user", text: "Building request..." },
     ]);
 
-    // ✅ Step 2: Get shorter version of user prompt
     const userBasePrompt =
       "STRICTLY: Make the prompt given shorter and do not use any emoji  return to the point prompt for up to 17 words or less but more than 12 words. If the user entered a specific site name, use the site name too.";
     const userShortPrompt = await gemeniRes(inputValue, userBasePrompt);
 
-    // ✅ Step 3: Update user's message
     setMessages((prev) => {
       const updated = [...prev];
       updated[updated.length - 1] = { type: "user", text: userShortPrompt };
       return updated;
     });
 
-    // ✅ Step 4: Show bot's profile picture with "Loading answer..."
     setMessages((prev) => [
       ...prev,
       { type: "bot", text: "Loading answer..." },
     ]);
 
-    // ✅ Step 5: Get bot's response
     setTimeout(async () => {
       const botBaseAnswer =
         "STRICTLY:Give a short heading starting with # and then a line br space." +
@@ -296,7 +233,6 @@ function ChatInputDemo({
         "Generate top 5 emoji based on this prompt."
       );
 
-      // ✅ Step 6: Update bot's message
       setMessages((prev) => {
         const updated = [...prev];
         updated[updated.length - 1] = { type: "bot", text: botResponse };
@@ -324,13 +260,8 @@ function ChatInputDemo({
   );
 }
 
-//==================================================================================================
-
 export default function Home() {
-  // ✅ Store user and bot messages together to keep relative order
-  const [messages, setMessages] = useState<
-    { type: "user" | "bot"; text: string }[]
-  >([]);
+  const [messages, setMessages] = useState([]);
 
   return (
     <div className="container">
@@ -355,7 +286,6 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Info Section */}
           <div className="eeon">
             <div className="eeonTop">
               <div className="profilePic">
@@ -369,21 +299,19 @@ export default function Home() {
             </div>
             <div className="eeonBottom">
               <div className="textBottom">Ask about:</div>
-              <div className="tagsContainer">
-                <div className="tag">Dev.to comments</div>
-                <div className="tag">Ask</div>
-                <div className="tag">Reaction for reddit</div>
-                <div className="tag">Github discussion</div>
-                <div className="tag">Snippet videos</div>
-              </div>
+              <div className="tagsContainer"></div>
+              <div className="tag">Dev.to comments</div>
+              <div className="tag">Ask</div>
+              <div className="tag">Reaction for reddit</div>
+              <div className="tag">Github discussion</div>
+              <div className="tag">Snippet videos</div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Pass setMessages to ChatInputDemo */}
-        <div className="bottom">
-          <ChatInputDemo setMessages={setMessages} />
-        </div>
+      <div className="bottom">
+        <ChatInputDemo setMessages={setMessages} />
       </div>
     </div>
   );
