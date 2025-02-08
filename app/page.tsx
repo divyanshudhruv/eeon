@@ -2,29 +2,41 @@
 import Image from "next/image";
 import "./style.css";
 import Avvvatars from "avvvatars-react";
+import { useState, useRef, useEffect } from "react";
 
-import { useState } from "react";
-import { toast } from "sonner";
-import { useTextArea } from "@/context/TextAreaContext";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { ArrowLeft, ArrowUpIcon } from "lucide-react";
+import React from "react";
+import { createContext, useContext } from "react";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card"
+import { CalendarDays } from "lucide-react"
+ 
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar"
+interface GeminiRequestBody {
+  contents: Array<{
+    role: string;
+    parts: Array<{ text: string }>;
+  }>;
+}
 
 interface GeminiResponse {
-  candidates?: {
-    content?: {
-      parts?: {
-        text?: string;
-      }[];
+  candidates: Array<{
+    content: {
+      parts: Array<{ text: string }>;
     };
-  }[];
+  }>;
 }
 
-interface GeminiRequestBody {
-  contents: {
-    role: string;
-    parts: {
-      text: string;
-    }[];
-  }[];
-}
 async function gemeniRes(message: string, basePrompt: string): Promise<string> {
   try {
     const apiKey: string | undefined = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
@@ -46,16 +58,9 @@ async function gemeniRes(message: string, basePrompt: string): Promise<string> {
     const data: GeminiResponse = await res.json();
     return data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
   } catch (error) {
-    return "Error occurred.";
+    return "Error occurred." + error;
   }
 }
-
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
-import { ArrowUpIcon } from "lucide-react";
-import type React from "react";
-import { createContext, useContext } from "react";
 
 interface ChatInputContextValue {
   value?: string;
@@ -94,7 +99,8 @@ function ChatInput({
   };
 
   return (
-    <ChatInputContext.Provider value={contextValue}>{/*BG WHITE - BG  TRANSPARENT */}
+    <ChatInputContext.Provider value={contextValue}>
+      {/*BG WHITE - BG  TRANSPARENT */}
       <div
         className={cn(
           variant === "default" &&
@@ -152,6 +158,7 @@ function ChatInputTextArea({
     <Textarea
       {...props}
       value={value}
+      placeholder="Type or paste your prompt here..."
       onChange={onChange}
       onKeyDown={handleKeyDown}
       style={{ resize: "none", scrollbarWidth: "none" }}
@@ -240,7 +247,6 @@ function ChatInputSubmit({
 
 ChatInputSubmit.displayName = "ChatInputSubmit";
 
-
 interface Message {
   id: number;
   type: "user" | "bot";
@@ -256,8 +262,6 @@ const ChatInputDemo: React.FC<ChatInputDemoProps> = ({ onNewMessage }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleSubmit = () => {
-    
-
     const eeonDiv = document.getElementById("eeonDiv");
     if (eeonDiv) {
       eeonDiv.style.animation = "eeonOut 0.5s forwards";
@@ -265,33 +269,86 @@ const ChatInputDemo: React.FC<ChatInputDemoProps> = ({ onNewMessage }) => {
 
     setTimeout(() => {
       const answerContainer = document.getElementById("answerContainer");
-    if (answerContainer) {
-      answerContainer.style.display = "flex";
-    }
-    if (!value.trim()) return; // Prevent sending empty messages
-    setIsLoading(true);
+      if (answerContainer) {
+        answerContainer.style.display = "flex";
+      }
+      if (!value.trim()) return; // Prevent sending empty messages
+      setIsLoading(true);
 
-    const userMessage: Message = {
-      id: Date.now(),
-      type: "user",
-      content: value,
-    };
-
-    onNewMessage(userMessage); // Add user message to UI
-
-    setTimeout(() => {
-      const botMessage: Message = {
+      const userMessage: Message = {
         id: Date.now(),
-        type: "bot",
-        content: "Finding the best emojis for you.",
+        type: "user",
+        content: value,
       };
 
-      onNewMessage(botMessage); // Add bot message after delay
-      setIsLoading(false);
+      onNewMessage(userMessage); // Add user message to UI
       setValue(""); // Clear input field
-    }, 1000);
-    }, 1000);
-    
+
+      setTimeout(async () => {
+        setIsLoading(true);
+        const formatBotResponse = (response: string) => {
+          return response
+            .split("\n")
+            .map((line) => {
+              if (line.startsWith("#")) {
+                return `<p style="font-size: 26px;"><b>${line
+                  .substring(1)
+                  .trim()}</b></p>`; // Heading
+              } else if (line.startsWith(">")) {
+                return `<pre style="background-color: #f5f5f5; padding: 8px; border-radius: 6px; font-size: 22px; text-align: center; margin: 5px 0; display: block;">${line
+                  .substring(1)
+                  .trim()}</pre>`; // Emoji block
+              } else {
+                return `<p>${line.trim()}</p>`; // Default text
+              }
+            })
+            .join(""); // Join to keep content as a string
+        };
+
+        // Get bot response
+        let botAnswer = await gemeniRes(
+          value,
+          `Analyze the given promptabove according to  these points and generate the most relevant emojis for discussions, reactions, or context representation. Follow these strict guidelines:
+
+1️. Validation:
+Only process meaningful prompts that belong to discussions, comments, GitHub issues, product launches, or relevant platforms (e.g., Dev.to, Dribbble, Reddit).
+DO NOT answer generic or irrelevant questions like "Hi," "Who are you?" or simple greetings.
+DO NOT process random words or incomplete thoughts. If the input is invalid, return:"This is not a valid prompt."
+ANSWER EVERY DETAILED AND LONG QUESTIONS NO MATTER WHAT THEY ASK
+
+2️. Response Structure:
+A short, meaningful heading starting with # (summarizes the prompt in 2-5 words).
+A concise explanation (max 30 words) explaining why the selected emojis are relevant. 🚫 No emojis in this explanation.
+A list of best-suited emojis for the context starting with >. Each emoji must be on a new line and separated by exactly 2 spaces. Maximum 4 emojies allowed
+
+3️. Example Output:
+# Groundbreaking Innovation  
+
+This breakthrough is set to change the industry and improve efficiency.  
+
+> 🚀   🌟   🔥  
+
+4️ Language: Strictly English.
+
+5. IMPORTANT:
+The emojis must be contextually relevant and align with the original prompt's intent only.
+If no suitable emojis exist, DO NOT force irrelevant ones and of different color theme.
+Ensure clear line breaks and correct formatting.
+
+6.VERY IMPORTANT VALIDATION:
+DO NOT ANSWER QUESTION LIKE HI, WHO ARE YOU, WHAT YOU DO, OR SMALL QUESTIONS  OR UNRELATED QUESTION, ANSWER ONLY WHICH IS ACTUALLY A QUESTION AND NOT A SPAMSHORT QUESTION.`
+        );
+
+        const botMessage: Message = {
+          id: Date.now(),
+          type: "bot",
+          content: formatBotResponse(botAnswer), // Use actual response
+        };
+
+        onNewMessage(botMessage); // Add bot message after delay
+        setIsLoading(false);
+      }, 1000);
+    }, 500);
   };
 
   return (
@@ -311,8 +368,6 @@ const ChatInputDemo: React.FC<ChatInputDemoProps> = ({ onNewMessage }) => {
   );
 };
 
-
-
 interface Message {
   id: number;
   type: "user" | "bot";
@@ -321,25 +376,32 @@ interface Message {
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const handleNewMessage = (message: Message) => {
     setMessages((prev) => [...prev, message]);
   };
+
+  useEffect(() => {
+    // Scroll to the latest message when messages update
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   return (
     <>
       <div className="container">
         <div className="eeonSpace">
           <div className="top">
-           
-           
-           
             <div className="answerContainer" id="answerContainer">
-              {messages.map((msg) => (
+              {messages.map((msg) =>
                 msg.type === "user" ? (
                   <div key={msg.id} className="user">
                     <div className="pfp">
-                      <Avvvatars value="qrwtwdqwe21uw" style="shape" size={55} />
+                      <Avvvatars
+                        value="qrwtwdqwe21uw"
+                        style="shape"
+                        size={55}
+                      />
                     </div>
                     <div className="prompt">{msg.content}</div>
                   </div>
@@ -347,27 +409,37 @@ export default function Home() {
                   <div key={msg.id} className="bot">
                     <div className="index">
                       <div className="pfp">
-                        <Avvvatars value="yehfe43g9aeon" style="shape" size={55} />
+                        <Avvvatars
+                          value="yehfe43g9aeon"
+                          style="shape"
+                          size={55}
+                        />
                       </div>
                       <div className="prompt">
-                        <span>{msg.content}</span>
+                        <span>Finding the best emojis for you...</span>
                       </div>
                     </div>
-                    <div className="answer" id="botAnswer">Generated bot response</div>
+                    <div
+                      className="answer"
+                      id="botAnswer"
+                      dangerouslySetInnerHTML={{ __html: msg.content }}
+                    ></div>
                   </div>
                 )
-              ))}
+              )}
+              <div ref={messagesEndRef} />
             </div>
 
-
-              <div className="eeon"  id="eeonDiv">
+            <div className="eeon" id="eeonDiv">
               <div className="eeonTop">
-                <div className="profilePic">
+              <div className="profilePic">
                   <Avvvatars value="yehfe43g9aeon" style="shape" size={100} />
                 </div>
+                
                 <div className="textTop">Talk data to me</div>
                 <div className="textBottom">
-                  Write your own prompt or select from the template and start chatting with eeon
+                  Write your own prompt or select from the template and start
+                  chatting with eeon
                 </div>
               </div>
               <div className="eeonBottom">
@@ -380,13 +452,16 @@ export default function Home() {
                   <div className="tag">Snippet videos</div>
                 </div>
               </div>
-            </div>  
+            </div>
           </div>
-          
+
           <div className="bottom">
             <ChatInputDemo onNewMessage={handleNewMessage} />
           </div>
         </div>
+      </div>
+      <div className="backHome" onClick={window.location.reload}>
+        <ArrowLeft color="#ffffff" size={18}/>
       </div>
     </>
   );
