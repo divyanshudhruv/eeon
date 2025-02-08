@@ -44,12 +44,16 @@ body {
   display: flex;
   position: relative;
   width: 100%;
+  outline: none;
+
   height: 75%;
   align-items: center;
   justify-content: center;
   background-color: none;
   overflow-x: hidden;
   overflow-y: scroll;
+  animation: eeonIn 1s !important;
+
   flex-direction: column;
 }
 
@@ -61,6 +65,7 @@ body {
   align-items: center;
   justify-content: center;
   background-color: none;
+  animation: eeonIn 1s !important;
 }
 
 .eeonSpace .top .eeon {
@@ -72,6 +77,7 @@ body {
   align-items: center;
   justify-content: start;
   flex-direction: column;
+  top: 20px;
 }
 
 .eeon .eeonTop {
@@ -190,7 +196,30 @@ body {
   }
 }
 
+@keyframes eeonIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+@keyframes eeonChatIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
 .top .answerContainer {
+  outline: none;
   display: none;
   background-color: none;
   width: 100%;
@@ -220,6 +249,7 @@ body {
   justify-content: start;
   flex-direction: row;
   min-height: fit-content;
+  animation: eeonChatIn 0.5s !important;
 }
 
 .user .pfp {
@@ -257,6 +287,7 @@ body {
   align-items: start;
   justify-content: start;
   flex-direction: column;
+  animation: eeonChatIn 0.5s !important;
 }
 
 .bot .index {
@@ -312,6 +343,9 @@ body {
   font-weight: normal;
   font-size: 13px;
   align-items: start;
+  white-space: pre-line;
+  flex-direction: column;
+  gap: 8px; /* Adjust spacing as needed */
   color: #101013;
   justify-content: start;
   padding-top: 10px;
@@ -349,3 +383,18 @@ body {
     height: 70% !important;
   }
 } */
+
+.backHome {
+  display: none;
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  background-color: #101013;
+  border-radius: 100%;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  top: 20px;
+  left: 20px;
+}
