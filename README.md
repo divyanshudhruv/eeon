@@ -46,11 +46,11 @@
 
 - **`Frontend`**: React, Next.js, Tailwind CSS, ShadcnUI 
 
-- **`Backend`**: Node.js, Supabase
+- **`Backend`**: Node.js, NeonDB
 
 - **`AI Model`**: Gemini, Self 
 
-- **`Database`**: Supabase
+- **`Database`**: NeonDB
   
 - **`Hosting`**: Vercel, Gh-Pages
 
