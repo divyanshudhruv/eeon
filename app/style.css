@@ -424,7 +424,7 @@ body {
     width: fit-content;
     white-space: pre-wrap;
     text-align: left !important;
-    max-width: 120px !important;
+    max-width: 110px !important;
   }
 }
 

@@ -320,7 +320,7 @@ The emojis must be contextually relevant and align with the original prompt's in
 2️. Response Structure:
 A short, meaningful heading starting with # (summarizes the prompt in 2-5 words).
 A concise explanation (max 30 words) explaining why the selected emojis are relevant. 🚫 No emojis in this explanation.
-A list of best-suited emojis for the context starting with >. Each emoji must be on a new line and separated by exactly 2 spaces. Maximum 4 emojies allowed
+A list of best-suited emojis for the context starting with >. Each emoji must be on a new line and separated by EXACTLY 2 SPACES CHARACTERS(if you add more, you dead.so better do not  add). Maximum 4 emojies allowed
 
 3️. Example Output:
 # Groundbreaking Innovation  
