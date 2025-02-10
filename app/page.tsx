@@ -2,7 +2,7 @@
 import "./style.css";
 import Avvvatars from "avvvatars-react";
 import { useState, useRef, useEffect } from "react";
-import {incrementPageView} from "./../lib/actions"
+import { incrementPageView } from "./../lib/actions";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,7 +31,7 @@ interface GeminiResponse {
 
 async function gemeniRes(message: string, basePrompt: string): Promise<string> {
   try {
-    const apiKey: string | undefined = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    const apiKey: string | undefined = process.env.NEXT_PUBLIC_GEMINI_API_KEY; // Get Gemini API Key from environment
     if (!apiKey) throw new Error("Missing Gemini API Key");
 
     const requestBody: GeminiRequestBody = {
@@ -54,6 +54,8 @@ async function gemeniRes(message: string, basePrompt: string): Promise<string> {
   }
 }
 
+// UI components from 21st.dev
+//=========================================================
 interface ChatInputContextValue {
   value?: string;
   onChange?: React.ChangeEventHandler<HTMLTextAreaElement>;
@@ -139,12 +141,13 @@ function ChatInputTextArea({
     }
     if (e.key === "Enter" && !e.shiftKey) {
       if (typeof value !== "string" || value.trim().length === 0) {
+        // Prevent sending empty messages
 
         return;
       }
       e.preventDefault();
-      onSubmit();          logClick(); // Track user click
-
+      onSubmit();
+      logClick(); // Track user click
     }
   };
 
@@ -170,9 +173,9 @@ function ChatInputTextArea({
 ChatInputTextArea.displayName = "ChatInputTextArea";
 
 interface ChatInputSubmitProps extends React.ComponentProps<typeof Button> {
-  onSubmit?: () => void;
+  onSubmit?: () => void; // Submit button
   loading?: boolean;
-  onStop?: () => void;
+  onStop?: () => void; // Stop button
 }
 
 function ChatInputSubmit({
@@ -229,7 +232,7 @@ function ChatInputSubmit({
       onClick={(event) => {
         event.preventDefault();
         if (!isDisabled) {
-          onSubmit?.();
+          onSubmit?.(); // Submit button
           logClick(); // Track user click
         }
       }}
@@ -257,21 +260,21 @@ const ChatInputDemo: React.FC<ChatInputDemoProps> = ({ onNewMessage }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleSubmit = () => {
-    const eeonDiv = document.getElementById("eeonDiv");
+    const eeonDiv = document.getElementById("eeonDiv"); // Get eeon div
     if (eeonDiv) {
-      eeonDiv.style.animation = "eeonOut 0.5s forwards";
+      eeonDiv.style.animation = "eeonOut 0.5s forwards"; //  Hide eeon div
     }
 
     setTimeout(() => {
       const answerContainer = document.getElementById("answerContainer");
       if (answerContainer) {
-        answerContainer.style.display = "flex";
+        answerContainer.style.display = "flex"; // Show answer container
       }
       if (!value.trim()) return; // Prevent sending empty messages
       setIsLoading(true);
 
       const userMessage: Message = {
-        id: Date.now(),
+        id: Date.now(), // Get current date
         type: "user",
         content: value,
       };
@@ -282,15 +285,18 @@ const ChatInputDemo: React.FC<ChatInputDemoProps> = ({ onNewMessage }) => {
       setTimeout(async () => {
         setIsLoading(true);
         const formatBotResponse = (response: string) => {
+          // Function to format RAW bot response
           return response
             .split("\n")
             .map((line) => {
               if (line.startsWith("#")) {
+                // Heading
                 return `<p style="font-size: 26px;"><b>${line
                   .substring(1)
-                  .trim()}</b></p>`; // Heading
+                  .trim()}</b></p>`;
               } else if (line.startsWith(">")) {
-                return `<pre style="background-color: #f5f5f5; padding: 8px; border-radius: 6px; font-size: 22px; text-align: center; margin: 5px 0; display: block;">${line
+                // Emoji list
+                return `<pre style="background-color: #f5f5f5; padding: 8px; border-radius: 6px; font-size: 22px; text-align: center; margin: 5px 0; display: flex;line-break:anywhere;text-warp:pre;">${line
                   .substring(1)
                   .trim()}</pre>`; // Emoji block
               } else {
@@ -302,14 +308,14 @@ const ChatInputDemo: React.FC<ChatInputDemoProps> = ({ onNewMessage }) => {
 
         // Get bot response
         const botAnswer = await gemeniRes(
+          // Use actual response + prompt
           value,
-          `Analyze the given promptabove according to  these points and generate the most relevant emojis for discussions, reactions, or context representation. Follow these strict guidelines:
+          `Analyze the given promptabove according to  these points and generate the most relevant emojis for context representation. Follow these strict guidelines:
 
 1️. Validation:
-Only process meaningful prompts that belong to discussions, comments, GitHub issues, product launches, or relevant platforms (e.g., Dev.to, Dribbble, Reddit).
-DO NOT answer generic or irrelevant questions like "Hi," "Who are you?" or simple greetings.
-DO NOT process random words or incomplete thoughts. If the input is invalid, return:"This is not a valid prompt."
 ANSWER EVERY DETAILED AND LONG QUESTIONS NO MATTER WHAT THEY ASK
+The emojis must be contextually relevant and align with the original prompt's intent only.
+
 
 2️. Response Structure:
 A short, meaningful heading starting with # (summarizes the prompt in 2-5 words).
@@ -331,7 +337,7 @@ If no suitable emojis exist, DO NOT force irrelevant ones and of different color
 Ensure clear line breaks and correct formatting.
 
 6.VERY IMPORTANT VALIDATION:
-DO NOT ANSWER QUESTION LIKE HI, WHO ARE YOU, WHAT YOU DO, OR SMALL QUESTIONS  OR UNRELATED QUESTION, ANSWER ONLY WHICH IS ACTUALLY A QUESTION AND NOT A SPAMSHORT QUESTION.`
+`
         );
 
         const botMessage: Message = {
@@ -341,12 +347,11 @@ DO NOT ANSWER QUESTION LIKE HI, WHO ARE YOU, WHAT YOU DO, OR SMALL QUESTIONS  OR
         };
 
         onNewMessage(botMessage); // Add bot message after delay
-        setIsLoading(false);
+        setIsLoading(false); // Stop loading (button active)
       }, 1000);
     }, 500);
   };
-  
- 
+
   return (
     <div className="w-full max-w-[425px] h-fit">
       <ChatInput
@@ -363,6 +368,7 @@ DO NOT ANSWER QUESTION LIKE HI, WHO ARE YOU, WHAT YOU DO, OR SMALL QUESTIONS  OR
     </div>
   );
 };
+//=========================================================
 
 interface Message {
   id: number;
@@ -372,22 +378,22 @@ interface Message {
 
 export default function Home() {
   useEffect(() => {
-    logVisitor();
+    logVisitor(); // Log visitor (neondb)
   }, []);
   useEffect(() => {
-    incrementPageView();
+    incrementPageView(); // Increment page view (neondb)
   }, []);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const handleNewMessage = (message: Message) => {
-    setMessages((prev) => [...prev, message]);
+    setMessages((prev) => [...prev, message]); // Add new message to the list
   };
 
   useEffect(() => {
     // Scroll to the latest message when messages update
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); // Scroll to the latest message
   }, [messages]);
 
   return (
@@ -425,7 +431,7 @@ export default function Home() {
                     <div
                       className="answer"
                       id="botAnswer"
-                      dangerouslySetInnerHTML={{ __html: msg.content }}
+                      dangerouslySetInnerHTML={{ __html: msg.content }} // Render HTML content strictly
                     ></div>
                   </div>
                 )
@@ -435,10 +441,10 @@ export default function Home() {
 
             <div className="eeon" id="eeonDiv">
               <div className="eeonTop">
-              <div className="profilePic">
+                <div className="profilePic">
                   <Avvvatars value="yehfe43g9aeon" style="shape" size={100} />
                 </div>
-                
+
                 <div className="textTop">Talk data to me</div>
                 <div className="textBottom">
                   Write your own prompt or select from the template and start
