@@ -290,7 +290,7 @@ const ChatInputDemo: React.FC<ChatInputDemoProps> = ({ onNewMessage }) => {
                   .substring(1)
                   .trim()}</b></p>`; // Heading
               } else if (line.startsWith(">")) {
-                return `<pre style="background-color: #f5f5f5; padding: 8px; border-radius: 6px; font-size: 22px; text-align: center; margin: 5px 0; display: block;">${line
+                return `<pre style="background-color: #f5f5f5; padding: 8px; border-radius: 6px; font-size: 22px; text-align: center; margin: 5px 0; display: flex;line-break:anywhere;text-warp:pre;">${line
                   .substring(1)
                   .trim()}</pre>`; // Emoji block
               } else {
@@ -303,13 +303,12 @@ const ChatInputDemo: React.FC<ChatInputDemoProps> = ({ onNewMessage }) => {
         // Get bot response
         const botAnswer = await gemeniRes(
           value,
-          `Analyze the given promptabove according to  these points and generate the most relevant emojis for discussions, reactions, or context representation. Follow these strict guidelines:
+          `Analyze the given promptabove according to  these points and generate the most relevant emojis for context representation. Follow these strict guidelines:
 
 1️. Validation:
-Only process meaningful prompts that belong to discussions, comments, GitHub issues, product launches, or relevant platforms (e.g., Dev.to, Dribbble, Reddit).
-DO NOT answer generic or irrelevant questions like "Hi," "Who are you?" or simple greetings.
-DO NOT process random words or incomplete thoughts. If the input is invalid, return:"This is not a valid prompt."
 ANSWER EVERY DETAILED AND LONG QUESTIONS NO MATTER WHAT THEY ASK
+The emojis must be contextually relevant and align with the original prompt's intent only.
+
 
 2️. Response Structure:
 A short, meaningful heading starting with # (summarizes the prompt in 2-5 words).
@@ -331,8 +330,7 @@ If no suitable emojis exist, DO NOT force irrelevant ones and of different color
 Ensure clear line breaks and correct formatting.
 
 6.VERY IMPORTANT VALIDATION:
-DO NOT ANSWER QUESTION LIKE HI, WHO ARE YOU, WHAT YOU DO, OR SMALL QUESTIONS  OR UNRELATED QUESTION, ANSWER ONLY WHICH IS ACTUALLY A QUESTION AND NOT A SPAMSHORT QUESTION.`
-        );
+`        );
 
         const botMessage: Message = {
           id: Date.now(),
