@@ -34,7 +34,7 @@ body {
   width: 700px;
   max-width: 500px;
   height: 100%;
-  background-color: none;
+  background-color: transparent;
   align-items: center;
   justify-content: start;
   flex-direction: column;
@@ -49,7 +49,7 @@ body {
   height: 75%;
   align-items: center;
   justify-content: center;
-  background-color: none;
+  background-color: transparent;
   overflow-x: hidden;
   overflow-y: scroll;
   animation: eeonIn 1s !important;
@@ -64,7 +64,7 @@ body {
   height: 25%;
   align-items: center;
   justify-content: center;
-  background-color: none;
+  background-color: transparent;
   animation: eeonIn 1s !important;
 }
 
@@ -73,7 +73,7 @@ body {
   display: flex;
   width: 400px;
   height: 300px;
-  background-color: none;
+  background-color: transparent;
   align-items: center;
   justify-content: start;
   flex-direction: column;
@@ -96,7 +96,7 @@ body {
   position: relative;
   width: 60px;
   height: 60px;
-  background-color: none;
+  background-color: transparent;
   border-radius: 15px;
   align-items: center;
   justify-content: center;
@@ -105,7 +105,7 @@ body {
 }
 
 .eeonTop .textTop {
-  background-color: none;
+  background-color: transparent;
   display: flex;
   font-family: "Onest", sans-serif;
   font-weight: 500;
@@ -115,7 +115,7 @@ body {
 }
 
 .eeonTop .textBottom {
-  background-color: none;
+  background-color: transparent;
   display: flex;
   font-family: "Onest", sans-serif;
   font-weight: 400;
@@ -129,7 +129,7 @@ body {
 .eeon .eeonBottom {
   display: flex;
   position: relative;
-  background-color: none;
+  background-color: transparent;
   width: 100%;
   height: 40%;
   align-items: center;
@@ -139,7 +139,7 @@ body {
 }
 
 .eeonBottom .textBottom {
-  background-color: none;
+  background-color: transparent;
   display: flex;
   font-family: "Onest", sans-serif;
   font-weight: 400;
@@ -159,7 +159,7 @@ body {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  background-color: none;
+  background-color: transparent;
   gap: 10px;
   flex-wrap: wrap;
 }
@@ -221,7 +221,7 @@ body {
 .top .answerContainer {
   outline: none;
   display: none;
-  background-color: none;
+  background-color: transparent;
   width: 100%;
   position: absolute;
   top: 0;
@@ -243,7 +243,7 @@ body {
   display: flex;
   position: relative;
   width: 90%;
-  background-color: none;
+  background-color: transparent;
   height: 40px;
   align-items: start;
   justify-content: start;
@@ -257,7 +257,7 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 25%;
-  background-color: none;
+  background-color: transparent;
   overflow: hidden;
   align-items: center;
   justify-content: center;
@@ -282,7 +282,7 @@ body {
   display: flex;
   position: relative;
   width: 90%;
-  background-color: none;
+  background-color: transparent;
   min-height: fit-content;
   align-items: start;
   justify-content: start;
@@ -297,9 +297,9 @@ body {
   flex-direction: row;
   width: 90%;
   position: relative;
-  background-color: none;
+  background-color: transparent;
   display: flex;
-  background-color: none;
+  background-color: transparent;
 }
 
 .bot .index .pfp {
@@ -307,7 +307,7 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 25%;
-  background-color: none;
+  background-color: transparent;
   overflow: hidden;
   align-items: center;
   justify-content: center;
@@ -318,7 +318,7 @@ body {
   position: relative;
   margin-left: 20px;
   font-size: 13px;
-  background-color: none;
+  background-color: transparent;
   height: fit-content;
   max-width: calc(100% - 60px);
   color: #101013;
@@ -333,11 +333,11 @@ body {
 }
 
 .bot .answer {
-  background-color: none;
+  background-color: transparent;
   width: 90%;
   display: flex;
   height: fit-content;
-  background-color: none;
+  background-color: transparent;
   min-height: fit-content;
   font-family: "Onest", sans-serif;
   font-weight: normal;
@@ -363,7 +363,7 @@ body {
   .bottom {
     scale: 1.4;
     overflow: hidden;
-    background-color: none;
+    background-color: transparent;
     height: fit-content !important;
     padding-top: 5px;
     padding-bottom: 5px;
@@ -376,7 +376,7 @@ body {
     scale: 1.2;
   }
   .answerContainer {
-    background-color: none;
+    background-color: transparent;
     padding-bottom: 100px !important
   ;
     padding-top: 70px !important;
@@ -397,4 +397,59 @@ body {
   cursor: pointer;
   top: 20px;
   left: 20px;
+}
+
+@media screen and (max-width: 480px) {
+  .top {
+    max-width: 85vw;
+  }
+
+  .eeon {
+    max-width: 100%;
+  }
+
+  .bottom {
+    max-width: 75vw;
+  }
+
+  .eeonTop {
+    scale: 0.9;
+  }
+  .eeonBottom {
+    scale: 1;
+    max-width: 270px;
+  }
+  .answer pre {
+    display: flex !important;
+    width: fit-content;
+    white-space: pre-wrap;
+    text-align: left !important;
+    max-width: 120px !important;
+  }
+}
+
+@media screen and (max-width: 300px) {
+  .top {
+    max-width: 90vw;
+  }
+
+  .eeon {
+    max-width: 100%;
+  }
+
+  .bottom {
+    max-width: 85vw;
+  }
+
+  .eeonTop {
+    scale: 0.9;
+  }
+  .eeonBottom {
+    scale: 1;
+    max-width: 270px;
+  }
+
+  .answer pre {
+    max-width: 48px !important;
+  }
 }
