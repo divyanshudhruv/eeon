@@ -6,13 +6,38 @@ import { incrementPageView } from "./../lib/actions";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label"; // Add this line
+import { Input } from "@/components/ui/input"; // Add this line
 import { cn } from "@/lib/utils";
-import { ArrowUpIcon } from "lucide-react";
+import { ArrowUpIcon, UserPenIcon } from "lucide-react";
 import React from "react";
 import { createContext, useContext } from "react";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { logVisitor } from "../lib/actions";
 import { logClick } from "../lib/actions";
+import { parse } from "path";
+
+let emojiValueFinal = 4;
+
+function parseEmoji(emoji: string): void {
+  let emojiParsed = parseInt(emoji); // Convert to integer
+  if (emojiParsed > 10) {
+    emojiValueFinal = 10; // Convert to integer
+  } else {
+    emojiValueFinal = parseInt(emoji); // Convert to integer
+  }
+} // Convert to integer
+
+function giveEmojiNumber() {
+  return emojiValueFinal;
+}
 
 interface GeminiRequestBody {
   contents: Array<{
@@ -155,7 +180,7 @@ function ChatInputTextArea({
     <Textarea
       {...props}
       value={value}
-      placeholder="Type or paste your prompt here..."
+      placeholder="Type or paste your prompt here ..."
       onChange={onChange}
       onKeyDown={handleKeyDown}
       style={{ resize: "none", scrollbarWidth: "none" }}
@@ -263,6 +288,9 @@ const ChatInputDemo: React.FC<ChatInputDemoProps> = ({ onNewMessage }) => {
     const eeonDiv = document.getElementById("eeonDiv"); // Get eeon div
     if (eeonDiv) {
       eeonDiv.style.animation = "eeonOut 0.5s forwards"; //  Hide eeon div
+      setTimeout(() => {
+        eeonDiv.style.display = "none"; //  Hide eeon div
+      }, 700);
     }
 
     setTimeout(() => {
@@ -296,9 +324,9 @@ const ChatInputDemo: React.FC<ChatInputDemoProps> = ({ onNewMessage }) => {
                   .trim()}</b></p>`;
               } else if (line.startsWith(">")) {
                 // Emoji list
-                return `<pre style="background-color: #f5f5f5; padding: 8px; border-radius: 6px; font-size: 22px; text-align: center; margin: 5px 0; display: flex;line-break:anywhere;text-warp:pre;">${line
+                return `<p style="background-color: #f7f7f7; padding: 8px; border-radius: 6px; font-size: 22px; text-align: left; margin: 5px 0; display: flex;line-break:anywhere;text-warp:pre;">${line
                   .substring(1)
-                  .trim()}</pre>`; // Emoji block
+                  .trim()}</p>`; // Emoji block
               } else {
                 return `<p>${line.trim()}</p>`; // Default text
               }
@@ -307,6 +335,10 @@ const ChatInputDemo: React.FC<ChatInputDemoProps> = ({ onNewMessage }) => {
         };
 
         // Get bot response
+
+        let emojiNumber = 4;
+        emojiNumber = giveEmojiNumber(); // Default emoji number
+        // Parse emoji number
         const botAnswer = await gemeniRes(
           // Use actual response + prompt
           value,
@@ -316,18 +348,18 @@ const ChatInputDemo: React.FC<ChatInputDemoProps> = ({ onNewMessage }) => {
 ANSWER EVERY DETAILED AND LONG QUESTIONS NO MATTER WHAT THEY ASK
 The emojis must be contextually relevant and align with the original prompt's intent only.
 
-
 2️. Response Structure:
 A short, meaningful heading starting with # (summarizes the prompt in 2-5 words).
 A concise explanation (max 30 words) explaining why the selected emojis are relevant. 🚫 No emojis in this explanation.
-A list of best-suited emojis for the context starting with >. Each emoji must be on a new line and separated by EXACTLY 2 SPACES CHARACTERS(if you add more, you dead.so better do not  add). Maximum 4 emojies allowed
-
+A list of best-suited emojis for the context starting with >. Each emoji must be on a new line and separated by EXACTLY 2 SPACES CHARACTERS(if you add more, you dead.so better do not  add). Maximum ${emojiNumber} emojies allowed not more that that
+GIVE MAXIMUM OF ${emojiNumber} EMOJIES NOT MORE THAN THAT (PLEASE DONT GIVE)
 3️. Example Output:
-# Groundbreaking Innovation  
+# HEADING
 
-This breakthrough is set to change the industry and improve efficiency.  
+DESCRIPTION ABOUT THE PROMPT
 
 > 🚀   🌟   🔥  
+
 
 4️ Language: Strictly English.
 
@@ -337,8 +369,13 @@ If no suitable emojis exist, DO NOT force irrelevant ones and of different color
 Ensure clear line breaks and correct formatting.
 
 6.VERY IMPORTANT VALIDATION:
+ASK USER TO AGAIN TYPE THE PROMPT IF THE QUESTION  IS 'VERY' INVALID
 `
         );
+
+        //Small  story with  details  also need to be answered.
+        // BUT DO NOT ANSWER THE QUESTIONS that ARE GREETING (NO HEADING,NO EMOJI,ONLY ERROR MESSAGE).
+        // IMPORTANT: SEE IF RANDOM WORDS OR LETTERS AREIN PROMPT, APPEAR WITH NO MEANING, DO NOT ANSWER (NO HEADING,NO EMOJI,ONLY ERROR MESSAGE).
 
         const botMessage: Message = {
           id: Date.now(),
@@ -396,6 +433,11 @@ export default function Home() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); // Scroll to the latest message
   }, [messages]);
 
+  const [open, setOpen] = React.useState(false);
+  const [emojiValue, setEmojiValue] = React.useState("4"); // Default emoji value
+
+  parseEmoji(emojiValue); // Parse emoji value
+
   return (
     <>
       <div className="container">
@@ -447,8 +489,8 @@ export default function Home() {
 
                 <div className="textTop">Talk data to me</div>
                 <div className="textBottom">
-                  Write your own prompt or select from the template and start
-                  chatting with eeon
+                  Write your own "detailed" prompt or select from the template
+                  and start chatting with eeon
                 </div>
               </div>
               <div className="eeonBottom">
@@ -458,14 +500,38 @@ export default function Home() {
                   <div className="tag">Ask</div>
                   <div className="tag">Reaction for Reddit</div>
                   <div className="tag">GitHub discussion</div>
-                  <div className="tag">Snippet videos</div>
+                  <div className="tag">Long stories</div>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="bottom">
-            <ChatInputDemo onNewMessage={handleNewMessage} />
+            <div className="textarea">
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <div className="button">
+                    <div id="dialogContainer">
+                      <UserPenIcon color="#bbb" size={13} />
+                    </div>
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Edit emojis number</DialogTitle>
+                    <DialogDescription>
+                      Make changes here. Click save when you're done.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <ProfileForm
+                    setOpen={setOpen}
+                    emojiValue={emojiValue}
+                    setEmojiValue={setEmojiValue}
+                  />
+                </DialogContent>
+              </Dialog>
+              <ChatInputDemo onNewMessage={handleNewMessage} />
+            </div>
           </div>
         </div>
       </div>
@@ -473,5 +539,38 @@ export default function Home() {
         <ArrowLeft color="#ffffff" size={18}/>
       </div> */}
     </>
+  );
+}
+function ProfileForm({
+  className,
+  setOpen,
+  emojiValue,
+  setEmojiValue,
+}: {
+  className?: string;
+  setOpen: (open: boolean) => void;
+  emojiValue: string;
+  setEmojiValue: (value: string) => void;
+}) {
+  const handleSave = (event: React.FormEvent) => {
+    event.preventDefault(); // Prevent page reload
+    console.log("Saved emoji:", emojiValue);
+    setOpen(false); // Close the dialog
+  };
+
+  return (
+    <form className={cn("grid items-start gap-4", className)}>
+      <div className="grid gap-2">
+        <Label htmlFor="emojies">Emojis number</Label>
+        <Input
+          type="text"
+          id="emojies"
+          placeholder="Maximum 10 emojis (default: 4)"
+          value={emojiValue}
+          onChange={(e) => setEmojiValue(e.target.value)}
+        />
+      </div>
+      <Button onClick={handleSave}>Save changes</Button>
+    </form>
   );
 }
