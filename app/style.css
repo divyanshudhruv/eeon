@@ -61,6 +61,7 @@ body {
   display: flex;
   position: relative;
   width: 100%;
+  max-width: 425px;
   height: 25%;
   align-items: center;
   justify-content: center;
@@ -274,7 +275,7 @@ body {
   font-weight: normal;
   align-items: center;
   color: #101013;
-
+  white-space: pre-line;
   justify-content: center;
 }
 
@@ -408,8 +409,16 @@ body {
     max-width: 100%;
   }
 
+  .eeonSpace {
+    max-height: 90vh;
+  }
+
+  .container {
+    max-height: 100svh;
+    overflow: hidden;
+  }
   .bottom {
-    max-width: 75vw;
+    max-width: 75vw !important;
   }
 
   .eeonTop {
@@ -438,7 +447,7 @@ body {
   }
 
   .bottom {
-    max-width: 85vw;
+    max-width: 85vw !important;
   }
 
   .eeonTop {
@@ -452,4 +461,40 @@ body {
   .answer pre {
     max-width: 48px !important;
   }
+}
+
+.textarea {
+  display: flex;
+  position: relative;
+  width: 100%;
+  height: fit-content;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  animation: eeonIn 1s !important;
+}
+
+.textarea .button {
+  display: flex;
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: #eee;
+  right: 10px;
+  top: 10px;
+  border: 1px solid #eee;
+  border-radius: 7px;
+  align-items: center;
+  justify-content: center;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: #e4e4e4;
+  border-color: #e4e4e4;
+}
+
+.font {
+  font-family: "Onest", sans-serif !important;
 }
