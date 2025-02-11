@@ -22,12 +22,11 @@ import {
 } from "@/components/ui/dialog";
 import { logVisitor } from "../lib/actions";
 import { logClick } from "../lib/actions";
-import { parse } from "path";
 
 let emojiValueFinal = 4;
 
 function parseEmoji(emoji: string): void {
-  let emojiParsed = parseInt(emoji); // Convert to integer
+  const emojiParsed = parseInt(emoji); // Convert to integer
   if (emojiParsed > 10) {
     emojiValueFinal = 10; // Convert to integer
   } else {
@@ -489,8 +488,8 @@ export default function Home() {
 
                 <div className="textTop">Talk data to me</div>
                 <div className="textBottom">
-                  Write your own "detailed" prompt or select from the template
-                  and start chatting with eeon
+                  Write your own &quot;detailed&quot; prompt or select from the
+                  template and start chatting with eeon
                 </div>
               </div>
               <div className="eeonBottom">
@@ -520,7 +519,7 @@ export default function Home() {
                   <DialogHeader>
                     <DialogTitle>Edit emojis number</DialogTitle>
                     <DialogDescription>
-                      Make changes here. Click save when you're done.
+                      Make changes here. Click save when you&apos;re done.
                     </DialogDescription>
                   </DialogHeader>
                   <ProfileForm
