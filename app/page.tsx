@@ -20,8 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { logVisitor } from "../lib/actions";
-import { logClick } from "../lib/actions";
+import { logVisitor,logClick } from "../lib/actions";
 
 let emojiValueFinal = 4;
 
@@ -106,15 +105,15 @@ function ChatInput({
   onSubmit,
   loading,
   onStop,
-}: ChatInputProps) {
-  const contextValue: ChatInputContextValue = {
+}: Readonly<ChatInputProps>) {
+  const contextValue: ChatInputContextValue = React.useMemo(() => ({
     value,
     onChange,
     onSubmit,
     loading,
     onStop,
     variant,
-  };
+  }), [value, onChange, onSubmit, loading, onStop, variant]);
 
   return (
     <ChatInputContext.Provider value={contextValue}>
@@ -149,7 +148,7 @@ function ChatInputTextArea({
   className,
   variant: variantProp,
   ...props
-}: ChatInputTextAreaProps) {
+}: Readonly<ChatInputTextAreaProps>) {
   const context = useContext(ChatInputContext);
   const value = valueProp ?? context.value ?? "";
   const onChange = onChangeProp ?? context.onChange;
@@ -208,7 +207,7 @@ function ChatInputSubmit({
   onStop: onStopProp,
   className,
   ...props
-}: ChatInputSubmitProps) {
+}: Readonly<ChatInputSubmitProps>) {
   const context = useContext(ChatInputContext);
   const loading = loadingProp ?? context.loading;
   const onStop = onStopProp ?? context.onStop;
@@ -335,9 +334,7 @@ const ChatInputDemo: React.FC<ChatInputDemoProps> = ({ onNewMessage }) => {
 
         // Get bot response
 
-        let emojiNumber = 4;
-        emojiNumber = giveEmojiNumber(); // Default emoji number
-        // Parse emoji number
+      
         const botAnswer = await gemeniRes(
           // Use actual response + prompt
           value,
@@ -350,8 +347,8 @@ The emojis must be contextually relevant and align with the original prompt's in
 2️. Response Structure:
 A short, meaningful heading starting with # (summarizes the prompt in 2-5 words).
 A concise explanation (max 30 words) explaining why the selected emojis are relevant. 🚫 No emojis in this explanation.
-A list of best-suited emojis for the context starting with >. Each emoji must be on a new line and separated by EXACTLY 2 SPACES CHARACTERS(if you add more, you dead.so better do not  add). Maximum ${emojiNumber} emojies allowed not more that that
-GIVE MAXIMUM OF ${emojiNumber} EMOJIES NOT MORE THAN THAT (PLEASE DONT GIVE)
+A list of best-suited emojis for the context starting with >. Each emoji must be on a new line and separated by EXACTLY 2 SPACES CHARACTERS(if you add more, you dead.so better do not  add). Maximum ${ giveEmojiNumber()  || 4} emojies allowed not more that that
+GIVE MAXIMUM OF ${ giveEmojiNumber() || 4} EMOJIES NOT MORE THAN THAT (PLEASE DONT GIVE)
 3️. Example Output:
 # HEADING
 
@@ -545,12 +542,12 @@ function ProfileForm({
   setOpen,
   emojiValue,
   setEmojiValue,
-}: {
+}: Readonly<{
   className?: string;
   setOpen: (open: boolean) => void;
   emojiValue: string;
   setEmojiValue: (value: string) => void;
-}) {
+}>) {
   const handleSave = (event: React.FormEvent) => {
     event.preventDefault(); // Prevent page reload
     console.log("Saved emoji:", emojiValue);
