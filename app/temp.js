@@ -1,39 +1,39 @@
-"use client";
-import "./style.css";
-import Avvvatars from "avvvatars-react";
+"use client"
+import "./style.css"
+import Avvvatars from "avvvatars-react"
 
-import { useState, createContext, useContext } from "react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
-import { ArrowUpIcon } from "lucide-react";
+import { useState, createContext, useContext } from "react"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
+import { ArrowUpIcon } from "lucide-react"
 
 async function gemeniRes(message, basePrompt) {
   try {
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    if (!apiKey) throw new Error("Missing Gemini API Key");
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
+    if (!apiKey) throw new Error("Missing Gemini API Key")
 
     const requestBody = {
-      contents: [{ role: "user", parts: [{ text: basePrompt + message }] }],
-    };
+      contents: [{ role: "user", parts: [{ text: basePrompt + message }] }]
+    }
 
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify(requestBody)
       }
-    );
+    )
 
-    const data = await res.json();
-    return data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
+    const data = await res.json()
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response."
   } catch (error) {
-    return "Error occurred."+ error;
+    return "Error occurred." + error
   }
 }
 
-const ChatInputContext = createContext({});
+const ChatInputContext = createContext({})
 
 function ChatInput({
   children,
@@ -43,7 +43,7 @@ function ChatInput({
   onChange,
   onSubmit,
   loading,
-  onStop,
+  onStop
 }) {
   const contextValue = {
     value,
@@ -51,8 +51,8 @@ function ChatInput({
     onSubmit,
     loading,
     onStop,
-    variant,
-  };
+    variant
+  }
 
   return (
     <ChatInputContext.Provider value={contextValue}>
@@ -67,10 +67,10 @@ function ChatInput({
         {children}
       </div>
     </ChatInputContext.Provider>
-  );
+  )
 }
 
-ChatInput.displayName = "ChatInput";
+ChatInput.displayName = "ChatInput"
 
 function ChatInputTextArea({
   onSubmit: onSubmitProp,
@@ -80,26 +80,26 @@ function ChatInputTextArea({
   variant: variantProp,
   ...props
 }) {
-  const context = useContext(ChatInputContext);
-  const value = valueProp ?? context.value ?? "";
-  const onChange = onChangeProp ?? context.onChange;
-  const onSubmit = onSubmitProp ?? context.onSubmit;
+  const context = useContext(ChatInputContext)
+  const value = valueProp ?? context.value ?? ""
+  const onChange = onChangeProp ?? context.onChange
+  const onSubmit = onSubmitProp ?? context.onSubmit
 
   const variant =
-    variantProp ?? (context.variant === "default" ? "unstyled" : "default");
+    variantProp ?? (context.variant === "default" ? "unstyled" : "default")
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = e => {
     if (!onSubmit) {
-      return;
+      return
     }
     if (e.key === "Enter" && !e.shiftKey) {
       if (typeof value !== "string" || value.trim().length === 0) {
-        return;
+        return
       }
-      e.preventDefault();
-      onSubmit();
+      e.preventDefault()
+      onSubmit()
     }
-  };
+  }
 
   return (
     <Textarea
@@ -116,10 +116,10 @@ function ChatInputTextArea({
         className
       )}
     />
-  );
+  )
 }
 
-ChatInputTextArea.displayName = "ChatInputTextArea";
+ChatInputTextArea.displayName = "ChatInputTextArea"
 
 function ChatInputSubmit({
   onSubmit: onSubmitProp,
@@ -128,10 +128,10 @@ function ChatInputSubmit({
   className,
   ...props
 }) {
-  const context = useContext(ChatInputContext);
-  const loading = loadingProp ?? context.loading;
-  const onStop = onStopProp ?? context.onStop;
-  const onSubmit = onSubmitProp ?? context.onSubmit;
+  const context = useContext(ChatInputContext)
+  const loading = loadingProp ?? context.loading
+  const onStop = onStopProp ?? context.onStop
+  const onSubmit = onSubmitProp ?? context.onSubmit
 
   if (loading && onStop) {
     return (
@@ -159,11 +159,11 @@ function ChatInputSubmit({
           <rect x="6" y="6" width="12" height="12" />
         </svg>
       </Button>
-    );
+    )
   }
 
   const isDisabled =
-    typeof context.value !== "string" || context.value.trim().length === 0;
+    typeof context.value !== "string" || context.value.trim().length === 0
 
   return (
     <Button
@@ -172,78 +172,75 @@ function ChatInputSubmit({
         className
       )}
       disabled={isDisabled}
-      onClick={(event) => {
-        event.preventDefault();
+      onClick={event => {
+        event.preventDefault()
         if (!isDisabled) {
-          onSubmit?.();
+          onSubmit?.()
         }
       }}
       {...props}
     >
       <ArrowUpIcon />
     </Button>
-  );
+  )
 }
 
-ChatInputSubmit.displayName = "ChatInputSubmit";
+ChatInputSubmit.displayName = "ChatInputSubmit"
 
 function ChatInputDemo({ setMessages }) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [inputValue, setInputValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false)
+  const [inputValue, setInputValue] = useState("")
 
   const handleSubmit = async () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim()) return
 
-    setIsLoading(true);
+    setIsLoading(true)
 
-    setMessages((prev) => [
+    setMessages(prev => [
       ...prev,
-      { type: "user", text: "Building request..." },
-    ]);
+      { type: "user", text: "Building request..." }
+    ])
 
     const userBasePrompt =
-      "STRICTLY: Make the prompt given shorter and do not use any emoji  return to the point prompt for up to 17 words or less but more than 12 words. If the user entered a specific site name, use the site name too.";
-    const userShortPrompt = await gemeniRes(inputValue, userBasePrompt);
+      "STRICTLY: Make the prompt given shorter and do not use any emoji  return to the point prompt for up to 17 words or less but more than 12 words. If the user entered a specific site name, use the site name too."
+    const userShortPrompt = await gemeniRes(inputValue, userBasePrompt)
 
-    setMessages((prev) => {
-      const updated = [...prev];
-      updated[updated.length - 1] = { type: "user", text: userShortPrompt };
-      return updated;
-    });
+    setMessages(prev => {
+      const updated = [...prev]
+      updated[updated.length - 1] = { type: "user", text: userShortPrompt }
+      return updated
+    })
 
-    setMessages((prev) => [
-      ...prev,
-      { type: "bot", text: "Loading answer..." },
-    ]);
+    setMessages(prev => [...prev, { type: "bot", text: "Loading answer..." }])
 
     setTimeout(async () => {
       const botBaseAnswer =
         "STRICTLY:Give a short heading starting with # and then a line br space." +
-        userShortPrompt;
+        userShortPrompt
       const prompt2 =
-        "Try to find a best emoji for the prompt. Then give a short description about why you found the emoji good and why will it work (in maximum 30 words) and then again line space br.";
-      const promptAnswer = botBaseAnswer + prompt2 + inputValue;
+        "Try to find a best emoji for the prompt. Then give a short description about why you found the emoji good and why will it work (in maximum 30 words) and then again line space br."
+      const promptAnswer = botBaseAnswer + prompt2 + inputValue
       const botResponse = await gemeniRes(
         promptAnswer,
         "Generate top 5 emoji based on this prompt."
-      );
+      )
 
-      setMessages((prev) => {
-        const updated = [...prev];
-        updated[updated.length - 1] = { type: "bot", text: botResponse };
-        return updated;
-      });
+      setMessages(prev => {
+        const updated = [...prev]
+        updated[updated.length - 1] = { type: "bot", text: botResponse }
+        return updated
+      })
 
-      setIsLoading(false);
-    }, 500);
-  };
+      setIsLoading(false)
+    }, 500)
+  }
 
   return (
     <div className="w-full max-w-[425px] h-full">
       <ChatInput
         variant="default"
         value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
+        onChange={e => setInputValue(e.target.value)}
         onSubmit={handleSubmit}
         loading={isLoading}
         onStop={() => setIsLoading(false)}
@@ -252,11 +249,11 @@ function ChatInputDemo({ setMessages }) {
         <ChatInputSubmit />
       </ChatInput>
     </div>
-  );
+  )
 }
 
 export default function Home() {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([])
 
   return (
     <div className="container">
@@ -309,5 +306,5 @@ export default function Home() {
         <ChatInputDemo setMessages={setMessages} />
       </div>
     </div>
-  );
+  )
 }

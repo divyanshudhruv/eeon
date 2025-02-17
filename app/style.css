@@ -300,7 +300,6 @@ body {
   position: relative;
   background-color: transparent;
   display: flex;
-  background-color: transparent;
 }
 
 .bot .index .pfp {
@@ -338,7 +337,6 @@ body {
   width: 90%;
   display: flex;
   height: fit-content;
-  background-color: transparent;
   min-height: fit-content;
   font-family: "Onest", sans-serif;
   font-weight: normal;
@@ -353,7 +351,6 @@ body {
   padding-left: 60px;
   word-wrap: break-word;
   text-wrap: pre;
-  white-space: wrap;
 }
 
 /* @media screen and (min-width: 950px) {
