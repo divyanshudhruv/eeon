@@ -1,8 +1,6 @@
 "use client";
 import "./style.css";
 import Avvvatars from "avvvatars-react";
-import { useState, useRef, useEffect } from "react";
-import { incrementPageView } from "./../lib/actions";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,8 +8,13 @@ import { Label } from "@/components/ui/label"; // Add this line
 import { Input } from "@/components/ui/input"; // Add this line
 import { cn } from "@/lib/utils";
 import { ArrowUpIcon, UserPenIcon } from "lucide-react";
-import React from "react";
-import { createContext, useContext } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useRef,
+  useEffect,
+} from "react";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { logVisitor,logClick } from "../lib/actions";
+import { logVisitor, logClick, incrementPageView } from "../lib/actions";
 
 let emojiValueFinal = 4;
 
@@ -106,14 +109,17 @@ function ChatInput({
   loading,
   onStop,
 }: Readonly<ChatInputProps>) {
-  const contextValue: ChatInputContextValue = React.useMemo(() => ({
-    value,
-    onChange,
-    onSubmit,
-    loading,
-    onStop,
-    variant,
-  }), [value, onChange, onSubmit, loading, onStop, variant]);
+  const contextValue: ChatInputContextValue = React.useMemo(
+    () => ({
+      value,
+      onChange,
+      onSubmit,
+      loading,
+      onStop,
+      variant,
+    }),
+    [value, onChange, onSubmit, loading, onStop, variant]
+  );
 
   return (
     <ChatInputContext.Provider value={contextValue}>
@@ -334,7 +340,6 @@ const ChatInputDemo: React.FC<ChatInputDemoProps> = ({ onNewMessage }) => {
 
         // Get bot response
 
-      
         const botAnswer = await gemeniRes(
           // Use actual response + prompt
           value,
@@ -347,8 +352,12 @@ The emojis must be contextually relevant and align with the original prompt's in
 2️. Response Structure:
 A short, meaningful heading starting with # (summarizes the prompt in 2-5 words).
 A concise explanation (max 30 words) explaining why the selected emojis are relevant. 🚫 No emojis in this explanation.
-A list of best-suited emojis for the context starting with >. Each emoji must be on a new line and separated by EXACTLY 2 SPACES CHARACTERS(if you add more, you dead.so better do not  add). Maximum ${ giveEmojiNumber()  || 4} emojies allowed not more that that
-GIVE MAXIMUM OF ${ giveEmojiNumber() || 4} EMOJIES NOT MORE THAN THAT (PLEASE DONT GIVE)
+A list of best-suited emojis for the context starting with >. Each emoji must be on a new line and separated by EXACTLY 2 SPACES CHARACTERS(if you add more, you dead.so better do not  add). Maximum ${
+            giveEmojiNumber() || 4
+          } emojies allowed not more that that
+GIVE MAXIMUM OF ${
+            giveEmojiNumber() || 4
+          } EMOJIES NOT MORE THAN THAT (PLEASE DONT GIVE)
 3️. Example Output:
 # HEADING
 
@@ -368,10 +377,6 @@ Ensure clear line breaks and correct formatting.
 ASK USER TO AGAIN TYPE THE PROMPT IF THE QUESTION  IS 'VERY' INVALID
 `
         );
-
-        //Small  story with  details  also need to be answered.
-        // BUT DO NOT ANSWER THE QUESTIONS that ARE GREETING (NO HEADING,NO EMOJI,ONLY ERROR MESSAGE).
-        // IMPORTANT: SEE IF RANDOM WORDS OR LETTERS AREIN PROMPT, APPEAR WITH NO MEANING, DO NOT ANSWER (NO HEADING,NO EMOJI,ONLY ERROR MESSAGE).
 
         const botMessage: Message = {
           id: Date.now(),
@@ -531,9 +536,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-      {/* <div className="backHome" onClick={window.location.reload}>
-        <ArrowLeft color="#ffffff" size={18}/>
-      </div> */}
     </>
   );
 }
