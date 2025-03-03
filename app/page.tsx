@@ -41,21 +41,6 @@ function giveEmojiNumber() {
   return emojiValueFinal;
 }
 
-interface GeminiRequestBody {
-  contents: Array<{
-    role: string;
-    parts: Array<{ text: string }>;
-  }>;
-}
-
-interface GeminiResponse {
-  candidates: Array<{
-    content: {
-      parts: Array<{ text: string }>;
-    };
-  }>;
-}
-
 async function gemeniRes(message: string, basePrompt: string): Promise<string> {
   try {
     const apiKey: string | undefined = process.env.NEXT_PUBLIC_GEMINI_API_KEY; // Get Gemini API Key from environment
