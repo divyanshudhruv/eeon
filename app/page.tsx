@@ -24,6 +24,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { logVisitor, logClick, incrementPageView } from "../lib/actions";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 let emojiValueFinal = 4;
 
@@ -60,23 +61,15 @@ async function gemeniRes(message: string, basePrompt: string): Promise<string> {
     const apiKey: string | undefined = process.env.NEXT_PUBLIC_GEMINI_API_KEY; // Get Gemini API Key from environment
     if (!apiKey) throw new Error("Missing Gemini API Key");
 
-    const requestBody: GeminiRequestBody = {
-      contents: [{ role: "user", parts: [{ text: basePrompt + message }] }],
-    };
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-    const res: Response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      }
-    );
+    const prompt = basePrompt + message;
+    const result = await model.generateContent(prompt);
 
-    const data: GeminiResponse = await res.json();
-    return data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
+    return result.response.text();
   } catch (error) {
-    return "Error occurred." + error;
+    return "Error occurred: " + error;
   }
 }
 
@@ -352,7 +345,7 @@ The emojis must be contextually relevant and align with the original prompt's in
 2️. Response Structure:
 A short, meaningful heading starting with # (summarizes the prompt in 2-5 words).
 A concise explanation (max 30 words) explaining why the selected emojis are relevant. 🚫 No emojis in this explanation.
-A list of best-suited emojis for the context starting with >. Each emoji must be on a new line and separated by EXACTLY 2 SPACES CHARACTERS(if you add more, you dead.so better do not  add). Maximum ${
+A list of best-suited emojis for the context starting with >. Each emoji must be on a SAME line and separated by EXACTLY "4" SPACES CHARACTERS(if you add more, you dead.so better do not  add). Maximum ${
             giveEmojiNumber() || 4
           } emojies allowed not more that that
 GIVE MAXIMUM OF ${
@@ -363,7 +356,7 @@ GIVE MAXIMUM OF ${
 
 DESCRIPTION ABOUT THE PROMPT
 
-> 🚀   🌟   🔥  
+> 🚀 🌟 🔥🧹 (in the same line)  
 
 
 4️ Language: Strictly English.
